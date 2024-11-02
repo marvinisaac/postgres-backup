@@ -1,0 +1,34 @@
+name: Build Docker image
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+
+jobs:
+  build:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub
+        uses: docker/login-action@v1.6.0
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile
+
+      - name: Push package
+        uses: docker/build-push-action@v1
+        with:
+          repository: marvinisaac/postgres-backup/postgres-backup
+          tags: latest
+          tag_with_ref: true
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
